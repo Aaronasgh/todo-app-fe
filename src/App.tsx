@@ -9,7 +9,7 @@ function App() {
         container
         justifyContent="center"
         alignItems="flex-start"
-        sx={{ minHeight: "66vh" }}
+        sx={{ minHeight: "100vh", pt: 25 }}
       >
         <Grid>
           <TodoCard />
