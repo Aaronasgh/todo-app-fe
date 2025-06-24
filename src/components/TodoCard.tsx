@@ -24,8 +24,20 @@ export default function TodoCard() {
     setTodos(data);
   };
 
+  const addTodos = async () => {
+    const res = await fetch(`http://localhost:4000/todos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: "Test Todo" }),
+    });
+    const data = (await res.json()) as Todo[];
+    console.log(data);
+    setTodos(data);
+  };
+
   useEffect(() => {
     getTodos();
+    addTodos();
   }, []);
 
   return (
