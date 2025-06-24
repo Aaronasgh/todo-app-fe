@@ -1,10 +1,11 @@
 import "./App.css";
-import TodoCard from "./components/todoCard";
-import { Grid } from "@mui/material";
+import TodoCard from "./components/TodoCard";
+import { Grid, ThemeProvider } from "@mui/material";
+import theme from "./utils/theme";
 
 function App() {
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Grid
         container
         justifyContent="center"
@@ -15,7 +16,7 @@ function App() {
           <TodoCard />
         </Grid>
       </Grid>
-    </>
+    </ThemeProvider>
   );
 }
 
