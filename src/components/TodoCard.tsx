@@ -2,7 +2,7 @@ import Card from "@mui/material/Card";
 // import CardActions from "@mui/material/CardActions";
 // import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Add from "@mui/icons-material/Add";
 import {
   List,
@@ -12,6 +12,8 @@ import {
   CardActions,
   Box,
   TextField,
+  Checkbox,
+  IconButton,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -28,6 +30,8 @@ export default function TodoCard() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [showInput, setShowInput] = useState(false);
   const [newTodoText, setNewTodoText] = useState("");
+  const [showCheckmarks, setShowCheckmarks] = useState(false);
+  const [selectedTodos, setSelectedTodos] = useState<number[]>([]);
 
   const getTodos = async () => {
     const res = await fetch(`http://localhost:4000/todos`);
@@ -47,9 +51,31 @@ export default function TodoCard() {
     setTodos(data);
   };
 
+  const deleteTodos = async () => {
+    const res = await fetch(`http://localhost:4000/todos`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selectedTodos),
+    });
+    const data = (await res.json()) as Todo[];
+    console.log(data);
+    setTodos(data);
+  };
+
   const handleAddTodo = () => {
     addTodos();
     setShowInput(false);
+    setNewTodoText("");
+  };
+
+  const handleDeleteTodos = () => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedTodos.length} Todos?`
+    );
+    if (confirmed) {
+      deleteTodos();
+      setSelectedTodos([]);
+    }
   };
 
   useEffect(() => {
@@ -105,8 +131,14 @@ export default function TodoCard() {
                 console.log(event.target.value);
               }}
               onKeyDown={(event) => {
-                if (event.key === "Enter") {
+                if (event.key === "Enter" && newTodoText != "") {
                   handleAddTodo();
+                } else if (
+                  (event.key === "Enter" && newTodoText === "") ||
+                  event.key === "Escape"
+                ) {
+                  setShowInput(false);
+                  return;
                 }
               }}
             />
@@ -118,24 +150,78 @@ export default function TodoCard() {
           <List sx={{ listStyleType: "disc", marginLeft: 5 }}>
             {todos.map((todo) => {
               return (
-                <ListItem key={todo.id} sx={{ display: "list-item" }}>
-                  {todo.text}
+                <ListItem
+                  key={todo.id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    paddingLeft: 0,
+                    listStyleType: "disc",
+                  }}
+                >
+                  • {todo.text}
+                  {/* Checkboxes */}
+                  {showCheckmarks && (
+                    <Checkbox
+                      sx={{
+                        marginLeft: 2,
+                        padding: 0, // remove padding inside checkbox container to avoid ListItems being pushed down
+                      }}
+                      onChange={(event) => {
+                        console.log(selectedTodos);
+                        if (event.target.checked) {
+                          setSelectedTodos((prev) => [...prev, todo.id]);
+                        } else {
+                          setSelectedTodos((prev) =>
+                            prev.filter((id) => id !== todo.id)
+                          );
+                        }
+                      }}
+                    />
+                  )}
                 </ListItem>
               );
             })}
-            {/* <ListItem sx={{ display: "list-item" }}>Buy Milk</ListItem>
-            <ListItem sx={{ display: "list-item" }}>Do Laundry</ListItem>
-            <ListItem sx={{ display: "list-item" }}>Buy Present</ListItem>
-            <ListItem sx={{ display: "list-item" }}>Buy Present</ListItem>
-            <ListItem sx={{ display: "list-item" }}>Buy Present</ListItem> */}
           </List>
         </Typography>
       </CardContent>
       <CardActions
         sx={{ display: "flex", justifyContent: "space-between", margin: 5 }}
       >
-        <Button size="small">Previous Page</Button>
-        <Button size="small">Next Page</Button>
+        <Box>
+          <IconButton
+            onClick={() => {
+              setShowCheckmarks(!showCheckmarks);
+            }}
+          >
+            <DeleteIcon
+              sx={{
+                color: showCheckmarks && todos.length != 0 ? "red" : "inherit",
+              }}
+            />
+          </IconButton>
+          {selectedTodos.length != 0 && (
+            <Button
+              size="small"
+              sx={{ color: "red", marginLeft: 3 }}
+              onClick={() => {
+                handleDeleteTodos();
+                console.log(selectedTodos);
+              }}
+            >
+              Delete Todos
+            </Button>
+          )}
+        </Box>
+
+        {/* Pageselect Buttons */}
+        <Box>
+          <Button size="small" sx={{ marginRight: 3 }}>
+            Previous Page
+          </Button>
+          <Button size="small">Next Page</Button>
+        </Box>
       </CardActions>
     </Card>
   );
