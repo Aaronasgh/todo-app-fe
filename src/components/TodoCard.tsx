@@ -41,35 +41,6 @@ export default function TodoCard() {
     currentPage * TODOS_PER_PAGE + TODOS_PER_PAGE
   );
 
-  // const getTodos = async () => {
-  //   const res = await fetch(`http://localhost:4000/todos`);
-  //   const data = (await res.json()) as Todo[];
-  //   console.log(data);
-  //   setTodos(data);
-  // };
-
-  // const addTodos = async () => {
-  //   const res = await fetch(`http://localhost:4000/todos`, {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ text: newTodoText }),
-  //   });
-  //   const data = (await res.json()) as Todo[];
-  //   console.log(data);
-  //   setTodos(data);
-  // };
-
-  // const deleteTodos = async () => {
-  //   const res = await fetch(`http://localhost:4000/todos`, {
-  //     method: "DELETE",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify(selectedTodos),
-  //   });
-  //   const data = (await res.json()) as Todo[];
-  //   console.log(data);
-  //   setTodos(data);
-  // };
-
   const getTodos = async () => {
     try {
       const res = await fetch(`http://localhost:4000/todos`);
@@ -118,18 +89,18 @@ export default function TodoCard() {
     getTodos();
   }, []);
 
-  const handleAddTodo = () => {
-    addTodos();
+  const handleAddTodo = async () => {
+    await addTodos();
     setShowInput(false);
     setNewTodoText("");
   };
 
-  const handleDeleteTodos = () => {
+  const handleDeleteTodos = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete ${selectedTodos.length} Todos?`
     );
     if (confirmed) {
-      deleteTodos();
+      await deleteTodos();
       setSelectedTodos([]);
     }
   };
@@ -181,7 +152,6 @@ export default function TodoCard() {
               value={newTodoText}
               onChange={(event) => {
                 setNewTodoText(event.target.value);
-                console.log(event.target.value);
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && newTodoText != "") {
@@ -224,7 +194,6 @@ export default function TodoCard() {
                         padding: 0, // remove padding inside checkbox container to avoid ListItems being pushed down
                       }}
                       onChange={(event) => {
-                        console.log(selectedTodos);
                         if (event.target.checked) {
                           setSelectedTodos((prev) => [...prev, todo.id]);
                         } else {
@@ -270,7 +239,6 @@ export default function TodoCard() {
               sx={{ color: "red", marginLeft: 3 }}
               onClick={() => {
                 handleDeleteTodos();
-                console.log(selectedTodos);
               }}
             >
               Delete Todos
