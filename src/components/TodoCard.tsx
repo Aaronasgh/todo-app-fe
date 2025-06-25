@@ -41,33 +41,77 @@ export default function TodoCard() {
     currentPage * TODOS_PER_PAGE + TODOS_PER_PAGE
   );
 
+  // const getTodos = async () => {
+  //   const res = await fetch(`http://localhost:4000/todos`);
+  //   const data = (await res.json()) as Todo[];
+  //   console.log(data);
+  //   setTodos(data);
+  // };
+
+  // const addTodos = async () => {
+  //   const res = await fetch(`http://localhost:4000/todos`, {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ text: newTodoText }),
+  //   });
+  //   const data = (await res.json()) as Todo[];
+  //   console.log(data);
+  //   setTodos(data);
+  // };
+
+  // const deleteTodos = async () => {
+  //   const res = await fetch(`http://localhost:4000/todos`, {
+  //     method: "DELETE",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(selectedTodos),
+  //   });
+  //   const data = (await res.json()) as Todo[];
+  //   console.log(data);
+  //   setTodos(data);
+  // };
+
   const getTodos = async () => {
-    const res = await fetch(`http://localhost:4000/todos`);
-    const data = (await res.json()) as Todo[];
-    console.log(data);
-    setTodos(data);
+    try {
+      const res = await fetch(`http://localhost:4000/todos`);
+      if (!res.ok)
+        throw new Error(`Fetch error: ${res.status} ${res.statusText}`);
+      const data = (await res.json()) as Todo[];
+      setTodos(data);
+    } catch (error) {
+      console.error("Failed to fetch todos:", error);
+    }
   };
 
   const addTodos = async () => {
-    const res = await fetch(`http://localhost:4000/todos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: newTodoText }),
-    });
-    const data = (await res.json()) as Todo[];
-    console.log(data);
-    setTodos(data);
+    try {
+      const res = await fetch(`http://localhost:4000/todos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: newTodoText }),
+      });
+      if (!res.ok)
+        throw new Error(`Add error: ${res.status} ${res.statusText}`);
+      const data = (await res.json()) as Todo[];
+      setTodos(data);
+    } catch (error) {
+      console.error("Failed to add todo:", error);
+    }
   };
 
   const deleteTodos = async () => {
-    const res = await fetch(`http://localhost:4000/todos`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selectedTodos),
-    });
-    const data = (await res.json()) as Todo[];
-    console.log(data);
-    setTodos(data);
+    try {
+      const res = await fetch(`http://localhost:4000/todos`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selectedTodos),
+      });
+      if (!res.ok)
+        throw new Error(`Delete error: ${res.status} ${res.statusText}`);
+      const data = (await res.json()) as Todo[];
+      setTodos(data);
+    } catch (error) {
+      console.error("Failed to delete todos:", error);
+    }
   };
 
   useEffect(() => {
