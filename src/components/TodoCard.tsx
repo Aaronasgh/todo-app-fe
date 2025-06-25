@@ -32,6 +32,14 @@ export default function TodoCard() {
   const [newTodoText, setNewTodoText] = useState("");
   const [showCheckmarks, setShowCheckmarks] = useState(false);
   const [selectedTodos, setSelectedTodos] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const TODOS_PER_PAGE = 5;
+
+  const paginatedTodos = todos.slice(
+    currentPage * TODOS_PER_PAGE,
+    currentPage * TODOS_PER_PAGE + TODOS_PER_PAGE
+  );
 
   const getTodos = async () => {
     const res = await fetch(`http://localhost:4000/todos`);
@@ -62,6 +70,10 @@ export default function TodoCard() {
     setTodos(data);
   };
 
+  useEffect(() => {
+    getTodos();
+  }, []);
+
   const handleAddTodo = () => {
     addTodos();
     setShowInput(false);
@@ -77,10 +89,6 @@ export default function TodoCard() {
       setSelectedTodos([]);
     }
   };
-
-  useEffect(() => {
-    getTodos();
-  }, []);
 
   return (
     <Card
@@ -121,6 +129,7 @@ export default function TodoCard() {
           >
             Add Todo
           </Button>
+
           {showInput && (
             <TextField
               autoFocus
@@ -148,7 +157,7 @@ export default function TodoCard() {
         {/* Todo List */}
         <Typography variant="h5" sx={{ wordBreak: "break-word" }}>
           <List sx={{ listStyleType: "disc", marginLeft: 5 }}>
-            {todos.map((todo) => {
+            {paginatedTodos.map((todo) => {
               return (
                 <ListItem
                   key={todo.id}
@@ -160,10 +169,12 @@ export default function TodoCard() {
                     listStyleType: "disc",
                   }}
                 >
-                  • {todo.text}
+                  {todo.text}
                   {/* Checkboxes */}
                   {showCheckmarks && (
                     <Checkbox
+                      color="error"
+                      checked={selectedTodos.includes(todo.id)}
                       sx={{
                         marginLeft: 2,
                         padding: 0, // remove padding inside checkbox container to avoid ListItems being pushed down
@@ -187,12 +198,19 @@ export default function TodoCard() {
         </Typography>
       </CardContent>
       <CardActions
-        sx={{ display: "flex", justifyContent: "space-between", margin: 5 }}
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          margin: 5,
+          marginBottom: 2,
+        }}
       >
         <Box>
+          {/* Delete IconButton */}
           <IconButton
             onClick={() => {
               setShowCheckmarks(!showCheckmarks);
+              if (showCheckmarks === false) setSelectedTodos([]);
             }}
           >
             <DeleteIcon
@@ -201,7 +219,8 @@ export default function TodoCard() {
               }}
             />
           </IconButton>
-          {selectedTodos.length != 0 && (
+          {/* Delete Confirm Button */}
+          {selectedTodos.length != 0 && showCheckmarks === true && (
             <Button
               size="small"
               sx={{ color: "red", marginLeft: 3 }}
@@ -217,12 +236,32 @@ export default function TodoCard() {
 
         {/* Pageselect Buttons */}
         <Box>
-          <Button size="small" sx={{ marginRight: 3 }}>
+          <Button
+            size="small"
+            sx={{ marginRight: 3 }}
+            disabled={currentPage === 0}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+          >
             Previous Page
           </Button>
-          <Button size="small">Next Page</Button>
+          <Button
+            size="small"
+            disabled={(currentPage + 1) * TODOS_PER_PAGE >= todos.length}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                (prev + 1) * TODOS_PER_PAGE < todos.length ? prev + 1 : prev
+              )
+            }
+          >
+            Next Page
+          </Button>
         </Box>
       </CardActions>
+      <Box
+        sx={{ display: "flex", justifyContent: "flex-end", marginRight: 12 }}
+      >
+        <Typography sx={{ marginBottom: 8 }}>{currentPage + 1}</Typography>
+      </Box>
     </Card>
   );
 }
